@@ -78,6 +78,8 @@ int sem_getvalue(sem_t sem, int *sval)
 
   if(sem->count > 0)
     sem->count = sval;
-    
+
+  //count should be the negative of the queue length by default (from sem_down count-- placement)
+
   return 0;
 }
