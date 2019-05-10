@@ -37,23 +37,35 @@ int sem_destroy(sem_t sem)
 int sem_down(sem_t sem)
 {
 	/* TODO Phase 1 */
-  enter_critical_section();
-  if (sem == NULL) {
+  if(sem == NULL)
     return -1;
+
+  while(sem->count <= 0){
+    pthread_t tid;
+    queue_enqueue(sem->blocked, tid);
+    thread_block();
   }
-  while (sem->count == 0) {
-    void* tid;
-    queue_enqueue(sem->blocked, &tid);
-    thread_block;
-  }
+
   sem->count--;
-  exit_critical_section();
+  enter_critical_section();
   return 0;
 }
 
 int sem_up(sem_t sem)
 {
-	/* TODO Phase 1 */
+  /* TODO Phase 1 */
+  if(sem == NULL)
+    return -1;
+
+  if(sem->count <= 0){
+    pthread_t tid;
+    queue_dequeue(sem->blocked, &tid)
+    thread_unblock(tid);
+  }
+
+  sem->count++;
+  exit_critical_section();
+  return 0;
 }
 
 int sem_getvalue(sem_t sem, int *sval)
