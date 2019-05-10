@@ -3,7 +3,7 @@ lib := libuthread.a
 
 # Target files of library
 parts := \
-	sem.o \
+	sem.o #\
 	tps.o
 
 all: $(lib) $(parts)
