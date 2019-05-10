@@ -73,4 +73,11 @@ int sem_up(sem_t sem)
 int sem_getvalue(sem_t sem, int *sval)
 {
 	/* TODO Phase 1 */
+  if(sem == NULL || sval == NULL)
+    return -1;
+
+  if(sem->count > 0)
+    sem->count = sval;
+    
+  return 0;
 }
