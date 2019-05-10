@@ -37,6 +37,7 @@ int sem_destroy(sem_t sem)
 int sem_down(sem_t sem)
 {
 	/* TODO Phase 1 */
+  enter_critical_section();
   if(sem == NULL)
     return -1;
 
@@ -47,13 +48,14 @@ int sem_down(sem_t sem)
   }
 
   sem->count--;
-  enter_critical_section();
+  exit_critical_section();
   return 0;
 }
 
 int sem_up(sem_t sem)
 {
   /* TODO Phase 1 */
+  enter_critical_section();
   if(sem == NULL)
     return -1;
 
