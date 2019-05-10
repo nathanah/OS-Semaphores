@@ -15,7 +15,7 @@ sem_t sem_create(size_t count)
 {
 	/* TODO Phase 1 */
   sem_t new_sem;
-  new_sem = (sem_t)malloc(sizeof(semaphore));
+  new_sem = (sem_t)malloc(sizeof(struct semaphore));
   new_sem->blocked = queue_create();
 
   new_sem->count = count;
@@ -25,7 +25,7 @@ sem_t sem_create(size_t count)
 int sem_destroy(sem_t sem)
 {
 	/* TODO Phase 1 */
-  if(sem == NULL || sem->blocked.size() > 0){
+  if(sem == NULL || queue_length(sem->blocked) > 0){
     return -1;
   }
 
@@ -77,7 +77,7 @@ int sem_getvalue(sem_t sem, int *sval)
     return -1;
 
   if(sem->count > 0)
-    sem->count = sval;
+    sem->count = (size_t)sval;
 
   //count should be the negative of the queue length by default (from sem_down count-- placement)
 
