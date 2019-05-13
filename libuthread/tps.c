@@ -142,11 +142,11 @@ int tps_clone(pthread_t tid)
   }
 
   //Copy tps
-  mprotect(current_tps->page->address, length, PROT_WRITE);
-  mprotect(tps->page->address, length, PROT_READ);
-  memcpy(current_tps->page->address, current_tps->page->address, length);
-  mprotect(current_tps->page->address, length, PROT_NONE);
-  mprotect(tps->page->address, length, PROT_NONE);
+  mprotect(current_tps->page->address, TPS_SIZE, PROT_WRITE);
+  mprotect(tps->page->address, TPS_SIZE, PROT_READ);
+  memcpy(current_tps->page->address, current_tps->page->address, TPS_SIZE);
+  mprotect(current_tps->page->address, TPS_SIZE, PROT_NONE);
+  mprotect(tps->page->address, TPS_SIZE, PROT_NONE);
 
   return 0;
 }
