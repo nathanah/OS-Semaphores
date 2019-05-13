@@ -85,16 +85,68 @@ int tps_destroy(void)
 int tps_read(size_t offset, size_t length, char *buffer)
 {
 	/* TODO: Phase 2 */
+  //get tps for current thread
+  tps_t tps;
+  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
+    //return -1 if no tps for this tid
+    return -1;
+  }
 
+  //Read from mem
+  mprotect(tps->page->address, length, PROT_READ);
+  memcpy(buffer, tps->page->address + offset, length);
+  mprotect(tps->page->address, length, PROT_NONE);
+
+  return 0;
 }
 
 int tps_write(size_t offset, size_t length, char *buffer)
 {
 	/* TODO: Phase 2 */
+  //get tps for current thread
+  tps_t tps;
+  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
+    //return -1 if no tps for this tid
+    return -1;
+  }
 
+  //Write to mem
+  mprotect(tps->page->address, length, PROT_WRITE);
+  memcpy(tps->page->address + offset, buffer, length);
+  mprotect(tps->page->address, length, PROT_NONE);
+
+  return 0;
 }
 
 int tps_clone(pthread_t tid)
 {
 	/* TODO: Phase 2 */
+  //check for tps for current thread
+  tps_t current_tps;
+  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &current_tps) == 0){
+    //return -1 if already tps for this tid
+    return -1;
+  }
+  //get tps for target thread
+  tps_t tps;
+  if(queue_iterate(tpsHolders, tps_find, tid, &tps) == -1){
+    //return -1 if no tps for this tid
+    return -1;
+  }
+
+  //Create new tps
+  tps_create();
+  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &current_tps) == -1){
+    //return -1 if no tps for this tid
+    return -1;
+  }
+
+  //Copy tps
+  mprotect(current_tps->page->address, length, PROT_WRITE);
+  mprotect(tps->page->address, length, PROT_READ);
+  memcpy(current_tps->page->address, current_tps->page->address, length);
+  mprotect(current_tps->page->address, length, PROT_NONE);
+  mprotect(tps->page->address, length, PROT_NONE);
+
+  return 0;
 }
