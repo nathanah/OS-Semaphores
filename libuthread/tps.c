@@ -30,9 +30,49 @@ typedef struct TPS *tps_t;
 
 queue_t tpsHolders;
 
+
+static void segv_handler(int sig, siginfo_t *si, void *context)
+{
+    /*
+     * Get the address corresponding to the beginning of the page where the
+     * fault occurred
+     */
+    void *p_fault = (void*)((uintptr_t)si->si_addr & ~(TPS_SIZE - 1));
+
+    /*
+     * Iterate through all the TPS areas and find if p_fault matches one of them
+     */
+    ...
+    if (/* There is a match */)
+        /* Printf the following error message */
+        fprintf(stderr, "TPS protection error!\n");
+
+    /* In any case, restore the default signal handlers */
+    signal(SIGSEGV, SIG_DFL);
+    signal(SIGBUS, SIG_DFL);
+    /* And transmit the signal again in order to cause the program to crash */
+    raise(sig);
+}
+
 int tps_init(int segv)
 {
 	/* TODO: Phase 2 */
+  tpsHolders = queue_create();
+
+  //...
+  if (segv) {
+    struct sigaction sa;
+
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = segv_handler;
+    sigaction(SIGBUS, &sa, NULL);
+    sigaction(SIGSEGV, &sa, NULL);
+  }
+  //...
+
+
+  return 0;
 }
 
 int tps_create(void)
