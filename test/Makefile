@@ -2,7 +2,7 @@
 programs := \
 	sem_count.x \
 	sem_buffer.x \
-	sem_prime.x \
+	sem_prime.x #\
 	tps.x
 
 # User-level thread library
@@ -80,4 +80,3 @@ clean:
 # Keep object files around
 .PRECIOUS: %.o
 .PHONY: clean $(libuthread)
-
