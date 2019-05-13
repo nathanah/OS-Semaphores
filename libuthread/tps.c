@@ -25,6 +25,8 @@ typedef struct page *page_t;
 struct TPS {
   pthread_t TID;
   struct pageHandler *page;
+  tps_t copyFrom;
+  queue_t copyingMe;
 }
 typedef struct TPS *tps_t;
 
@@ -85,11 +87,11 @@ int tps_create(void)
   }
 
   currTPS->TID = pthread_self();
-  page_t page = malloc(sizeofstruct(page));
+  page_t page = malloc(sizeofstruct(page));//////////////////////////////////////no?
   if (!page)
     return 1;
 
-  page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);
+  page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);///no?
   currTPS->page = page;
   queue_enqueue(tpsHolders, currTPS);
 
@@ -117,6 +119,7 @@ int tps_destroy(void)
 
   //delete tps stuff
   munmap(tps->page->address, TPS_SIZE);
+  free(tps->page);
   free(tps);
 
   return 0;
@@ -140,6 +143,28 @@ int tps_read(size_t offset, size_t length, char *buffer)
   return 0;
 }
 
+int actually_copy(tps_t tps_dest, tps_t tps_source){
+
+  //Create new page
+
+
+
+  //Copy tps
+  mprotect(tps_dest->page->address, TPS_SIZE, PROT_WRITE);
+  mprotect(tps_source->page->address, TPS_SIZE, PROT_READ);
+  memcpy(tps_dest->page->address, tps_source->page->address, TPS_SIZE);
+  mprotect(tps_dest->page->address, TPS_SIZE, PROT_NONE);
+  mprotect(tps_source->page->address, TPS_SIZE, PROT_NONE);
+
+  //delete tps_dest from tps_source->copyingMe
+
+
+  //set tps_dest->copyFrom to null
+
+
+  return 0;
+}
+
 int tps_write(size_t offset, size_t length, char *buffer)
 {
 	/* TODO: Phase 2 */
@@ -148,6 +173,14 @@ int tps_write(size_t offset, size_t length, char *buffer)
   if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
     //return -1 if no tps for this tid
     return -1;
+  }
+
+  if(tps->copyFrom){
+    actually_copy(tps,tps->copyFrom);
+  }
+
+  if(tps->copyingMe.size()>0){
+    queue_iterate(copyingMe,actually_copy, tps);
   }
 
   //Write to mem
@@ -174,19 +207,9 @@ int tps_clone(pthread_t tid)
     return -1;
   }
 
-  //Create new tps
   tps_create();
-  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &current_tps) == -1){
-    //return -1 if no tps for this tid
-    return -1;
-  }
-
-  //Copy tps
-  mprotect(current_tps->page->address, TPS_SIZE, PROT_WRITE);
-  mprotect(tps->page->address, TPS_SIZE, PROT_READ);
-  memcpy(current_tps->page->address, current_tps->page->address, TPS_SIZE);
-  mprotect(current_tps->page->address, TPS_SIZE, PROT_NONE);
-  mprotect(tps->page->address, TPS_SIZE, PROT_NONE);
+  current_tps->page = tps->page;
+  current_tps->copyFrom = tps;
 
   return 0;
 }
