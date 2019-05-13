@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "queue.h"
 #include "sem.h"
@@ -29,7 +30,7 @@ int sem_destroy(sem_t sem)
     return -1;
   }
 
-  free(sem->blocked);
+  queue_destroy(sem->blocked);
   free(sem);
   return 0;
 }
@@ -41,13 +42,12 @@ int sem_down(sem_t sem)
   if(sem == NULL)
     return -1;
 
-  sem->count--;
-  while(sem->count <= 0){
-    pthread_t tid = pthread_self();
-    queue_enqueue(sem->blocked, &tid);
+  while(sem->count == 0){
+    queue_enqueue(sem->blocked, (void*)pthread_self());
     thread_block();
   }
-
+	
+  sem->count -= 1;
   exit_critical_section();
   return 0;
 }
@@ -59,13 +59,13 @@ int sem_up(sem_t sem)
   if(sem == NULL)
     return -1;
 
-  if(sem->count < 0){
-    pthread_t tid;
-    queue_dequeue(sem->blocked, (void **)&tid);
-    thread_unblock(tid);
+  sem->count += 1;
+  if (queue_length(sem->blocked) != 0) {
+    void* tid;
+    queue_dequeue(sem->blocked, &tid);
+    thread_unblock((pthread_t)tid);
   }
 
-  sem->count++;
   exit_critical_section();
   return 0;
 }
@@ -76,9 +76,12 @@ int sem_getvalue(sem_t sem, int *sval)
   if(sem == NULL || sval == NULL)
     return -1;
 
-  if(sem->count > 0)
-    sem->count = (size_t)sval;
-
+  if (sem->count > 0) {
+	  *sval = sem->count; 
+  }
+  else {
+	  *sval = -1*queue_length(sem->blocked);
+  }
   //count should be the negative of the queue length by default (from sem_down count-- placement)
 
   return 0;
