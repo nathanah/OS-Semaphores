@@ -1,4 +1,3 @@
-will write later
 #Semaphore
 ##structure
 Each semaphore consists of just a count variable and a queue pointer.

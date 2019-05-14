@@ -15,7 +15,6 @@
 #define FD -1
 #define OFFSET 0
 
-/* TODO: Phase 2 */
 struct page
 }
   void *address;
@@ -58,7 +57,6 @@ static void segv_handler(int sig, siginfo_t *si, void *context)
 
 int tps_init(int segv)
 {
-	/* TODO: Phase 2 */
   tpsHolders = queue_create();
 
   //...
@@ -79,7 +77,6 @@ int tps_init(int segv)
 
 int tps_create(void)
 {
-	/* TODO: Phase 2 */
   tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
 
   if (!currTPS) {
@@ -87,11 +84,12 @@ int tps_create(void)
   }
 
   currTPS->TID = pthread_self();
-  page_t page = malloc(sizeofstruct(page));//////////////////////////////////////no?
+  page_t page = malloc(sizeofstruct(page));
+
   if (!page)
     return 1;
 
-  page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);///no?
+  page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);
   currTPS->page = page;
   queue_enqueue(tpsHolders, currTPS);
 
@@ -109,7 +107,6 @@ int tps_find(tps_t tps, pthread_t tid){
 
 int tps_destroy(void)
 {
-	/* TODO: Phase 2 */
   //get tps for current thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
@@ -127,7 +124,6 @@ int tps_destroy(void)
 
 int tps_read(size_t offset, size_t length, char *buffer)
 {
-	/* TODO: Phase 2 */
   //get tps for current thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
@@ -146,8 +142,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
 int actually_copy(tps_t tps_dest, tps_t tps_source){
 
   //Create new page
-
-
+  tps_dest->page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);
 
   //Copy tps
   mprotect(tps_dest->page->address, TPS_SIZE, PROT_WRITE);
@@ -157,17 +152,16 @@ int actually_copy(tps_t tps_dest, tps_t tps_source){
   mprotect(tps_source->page->address, TPS_SIZE, PROT_NONE);
 
   //delete tps_dest from tps_source->copyingMe
-
+  queue_delete(tps_source->copyingMe, tps_dest);
 
   //set tps_dest->copyFrom to null
-
+  tps_dest->copyFrom = NULL;
 
   return 0;
 }
 
 int tps_write(size_t offset, size_t length, char *buffer)
 {
-	/* TODO: Phase 2 */
   //get tps for current thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
@@ -191,9 +185,29 @@ int tps_write(size_t offset, size_t length, char *buffer)
   return 0;
 }
 
+int tps_create_with_pointer(tps_t tps)
+{
+  tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
+
+  if (!currTPS) {
+    return -1;
+  }
+
+  currTPS->TID = pthread_self();
+  page_t page = malloc(sizeofstruct(page))
+  if (!page)
+    return 1;
+
+  currTPS->page->address = tps->page->address;
+  queue_enqueue(tpsHolders, currTPS);
+  currTPS->copyFrom = tps;
+  tps->copyingMe.add(currTPS);
+
+  return 0;
+}
+
 int tps_clone(pthread_t tid)
 {
-	/* TODO: Phase 2 */
   //check for tps for current thread
   tps_t current_tps;
   if(queue_iterate(tpsHolders, tps_find, pthread_self(), &current_tps) == 0){
@@ -207,9 +221,7 @@ int tps_clone(pthread_t tid)
     return -1;
   }
 
-  tps_create();
-  current_tps->page = tps->page;
-  current_tps->copyFrom = tps;
+  tps_create_with_pointer(tps);
 
   return 0;
 }
