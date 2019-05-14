@@ -42,7 +42,7 @@ tps_t tps_address_find(void* targetTPS) {
   }
   // Iterate through the queue and see if targetTPS exist in said queue
   // If it does not exist we return NULL
-  if (queue_iterate(tpsHolders, queue_address, targetTPS, (void**)&current) == -1) {
+  if (queue_iterate(tpsHolders, queue_address, (void*)targetTPS, (void**)&current) == -1) {
     return NULL;
   }
   return current;
@@ -123,7 +123,7 @@ int tps_destroy(void)
 {
   //get tps for current thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
+  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps) == -1){
     //return -1 if no tps for this tid
     return -1;
   }
@@ -140,7 +140,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
 {
   //get tps for current thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
+  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void **)&tps) == -1){
     //return -1 if no tps for this tid
     return -1;
   }
@@ -178,7 +178,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
 {
   //get tps for current thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &tps) == -1){
+  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps) == -1){
     //return -1 if no tps for this tid
     return -1;
   }
@@ -186,9 +186,9 @@ int tps_write(size_t offset, size_t length, char *buffer)
   if(tps->copyFrom){
     actually_copy(tps,tps->copyFrom);
   }
-
+  int *dummy;
   if(tps->copyingMe.size()>0){
-    queue_iterate(copyingMe,actually_copy, tps);
+    queue_iterate(copyingMe, actually_copy, (void*)tps, (void**)&dummy);
   }
 
   //Write to mem
@@ -224,13 +224,13 @@ int tps_clone(pthread_t tid)
 {
   //check for tps for current thread
   tps_t current_tps;
-  if(queue_iterate(tpsHolders, tps_find, pthread_self(), &current_tps) == 0){
+  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps) == 0){
     //return -1 if already tps for this tid
     return -1;
   }
   //get tps for target thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, tid, &tps) == -1){
+  if(queue_iterate(tpsHolders, tps_find, (void*)tid, (void**)&tps) == -1){
     //return -1 if no tps for this tid
     return -1;
   }
