@@ -41,7 +41,7 @@ tps_t tps_address_find(void* targetTPS) {
     return NULL;
   }
   // Iterate through the queue and see if targetTPS exist in said queue
-  // If it does not exist we return NULL 
+  // If it does not exist we return NULL
   if (queue_iterate(tpsHolders, queue_address, targetTPS, (void**)&current) == -1) {
     return NULL;
   }
@@ -101,7 +101,7 @@ int tps_create(void)
     return -1;
   }
 
-  currTPS->TID = pthread_self();
+  currTPS->tid = pthread_self();
   page_t page = malloc(sizeof(struct page));
 
   if (!page)
@@ -210,15 +210,15 @@ int tps_create_with_pointer(tps_t tps)
     return -1;
   }
 
-  currTPS->TID = pthread_self();
-  page_t page = malloc(sizeofstruct(page))
+  currTPS->tid = pthread_self();
+  page_t page = malloc(sizeof(struct page));
   if (!page)
     return 1;
 
   currTPS->page->address = tps->page->address;
   queue_enqueue(tpsHolders, currTPS);
   currTPS->copyFrom = tps;
-  tps->copyingMe.add(currTPS);
+  queue_enqueue(tps->copyingMe, currTPS);
 
   return 0;
 }
