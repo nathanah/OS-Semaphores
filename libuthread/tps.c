@@ -153,7 +153,9 @@ int tps_read(size_t offset, size_t length, char *buffer)
   return 0;
 }
 
-int actually_copy(tps_t tps_dest, tps_t tps_source){
+int actually_copy(void *dest, void *source){
+  tps_t tps_dest = (tps_t)dest;
+  tps_t tps_source = (tps_t)source;
 
   //Create new page
   tps_dest->page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);
@@ -187,8 +189,8 @@ int tps_write(size_t offset, size_t length, char *buffer)
     actually_copy(tps,tps->copyFrom);
   }
   int *dummy;
-  if(tps->copyingMe.size()>0){
-    queue_iterate(copyingMe, actually_copy, (void*)tps, (void**)&dummy);
+  if(queue_length(tps->copyingMe)>0){
+    queue_iterate(tps->copyingMe, actually_copy, (void*)tps, (void**)&dummy);
   }
 
   //Write to mem
