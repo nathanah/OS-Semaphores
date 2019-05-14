@@ -30,6 +30,7 @@ typedef struct TPS *tps_t;
 
 queue_t tpsHolders;
 
+// Compares the current target TPS address to the p_fault
 int queue_address(void* targetTPS, void* address) {
   return ((tps_t) targetTPS)->page->address == address ? 1 : 0;
 }
@@ -39,6 +40,8 @@ tps_t tps_address_find(void* targetTPS) {
   if (tpsHolders == NULL || !targetTPS) {
     return NULL;
   }
+  // Iterate through the queue and see if targetTPS exist in said queue
+  // If it does not exist we return NULL 
   if (queue_iterate(tpsHolders, queue_address, targetTPS, (void**)&current) == -1) {
     return NULL;
   }
@@ -57,6 +60,8 @@ static void segv_handler(int sig, siginfo_t *si, void *context)
      * Iterate through all the TPS areas and find if p_fault matches one of them
      */
     tps_t targetTPS = tps_address_find(p_fault);
+
+    // If we do find a match we print the error
     if (targetTPS != NULL)
         /* Printf the following error message */
         fprintf(stderr, "TPS protection error!\n");
