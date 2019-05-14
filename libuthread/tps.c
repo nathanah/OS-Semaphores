@@ -116,7 +116,7 @@ int tps_create(void)
 
 //queue_iterate function to return tps with given tid
 int tps_find(void* tps, void* tid){
-  return ((tps_t)tps->tid == (pthread_t)tid) ? 1 : 0;
+  return (((tps_t)tps)->tid == (pthread_t)tid) ? 1 : 0;
 }
 
 int tps_destroy(void)
