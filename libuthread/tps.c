@@ -39,7 +39,7 @@ tps_t tps_address_find(void* targetTPS) {
   if (tpsHolders == NULL || !targetTPS) {
     return NULL;
   }
-  if (queue_iterate(tpsHolders, queue_address, targetTPS, (void**)&current) {
+  if (queue_iterate(tpsHolders, queue_address, targetTPS, (void**)&current) == -1) {
     return NULL;
   }
   return current;
