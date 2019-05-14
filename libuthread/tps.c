@@ -21,9 +21,9 @@ struct page {
 typedef struct page *page_t;
 
 struct TPS {
-  pthread_t TID;
+  pthread_t tid;
   struct pageHandler *page;
-  tps_t copyFrom;
+  struct TPS *copyFrom;
   queue_t copyingMe;
 };
 typedef struct TPS *tps_t;
@@ -31,7 +31,7 @@ typedef struct TPS *tps_t;
 queue_t tpsHolders;
 
 int queue_address(void* targetTPS, void* address) {
-  return ((tps_t) targetTPS)->page->address == *(pthread_t*)address ? 1 : 0;
+  return ((tps_t) targetTPS)->page->address == address ? 1 : 0;
 }
 
 tps_t tps_address_find(void* targetTPS) {
@@ -97,7 +97,7 @@ int tps_create(void)
   }
 
   currTPS->TID = pthread_self();
-  page_t page = malloc(sizeofstruct(page));
+  page_t page = malloc(sizeof(struct page));
 
   if (!page)
     return 1;
@@ -114,8 +114,7 @@ int tps_find(tps_t tps, pthread_t tid){
   if(tps->tid == tid){
     return 1;
   }
-  else
-    return 0;
+  return 0;
 }
 
 int tps_destroy(void)
