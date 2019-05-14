@@ -22,7 +22,7 @@ typedef struct page *page_t;
 
 struct TPS {
   pthread_t tid;
-  struct pageHandler *page;
+  page_t page;
   struct TPS *copyFrom;
   queue_t copyingMe;
 };
