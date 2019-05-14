@@ -15,10 +15,9 @@
 #define FD -1
 #define OFFSET 0
 
-struct page
-}
+struct page {
   void *address;
-}
+};
 typedef struct page *page_t;
 
 struct TPS {
@@ -26,7 +25,7 @@ struct TPS {
   struct pageHandler *page;
   tps_t copyFrom;
   queue_t copyingMe;
-}
+};
 typedef struct TPS *tps_t;
 
 queue_t tpsHolders;
@@ -44,6 +43,7 @@ tps_t tps_address_find(void* targetTPS) {
     return NULL;
   }
   return current;
+}
 
 static void segv_handler(int sig, siginfo_t *si, void *context)
 {
