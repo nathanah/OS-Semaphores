@@ -43,7 +43,7 @@ CFLAGS	+= -g
 endif
 
 # Linker options
-LDFLAGS := -L$(UTHREADPATH) -luthread, --wrap=mmap, -Wl
+LDFLAGS := -L$(UTHREADPATH) -luthread
 
 # Include path
 INCLUDE := -I$(UTHREADPATH)
@@ -62,6 +62,8 @@ deps := $(patsubst %.o,%.d,$(objs))
 $(libuthread):
 	@echo "MAKE	$@"
 	$(Q)$(MAKE) V=$(V) D=$(D) -C $(UTHREADPATH)
+
+tpsPt3.x: LDFLAGS += -Wl, --wrap=mmap
 
 # Generic rule for linking final applications
 %.x: %.o $(libuthread)
