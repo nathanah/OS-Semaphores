@@ -26,8 +26,8 @@ void *thread1(void *arg)
     assert(tps_write(0, 1024, tps_addr) == 0);
     assert(tps_read(0, 1024, tps_addr) == 0);
 
-    char *tps_addr = latest_mmap_addr;
-    tps_addr[0] = '\0';
+    char *extra_tps_addr = latest_mmap_addr;
+    extra_tps_addr[0] = '\0';
 
     return 0;
 }
