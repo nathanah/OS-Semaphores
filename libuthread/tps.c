@@ -138,7 +138,6 @@ int tps_destroy(void)
 
 int tps_read(size_t offset, size_t length, char *buffer)
 {
-  printf("entered read\n");
   //get tps for current thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void **)&tps) == -1){
@@ -147,6 +146,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
   }
 
   enter_critical_section();
+    printf("entered read\n");
   //Read from mem
   mprotect(tps->page->address, length, PROT_READ);
   memcpy(buffer, tps->page->address + offset, length);
@@ -183,7 +183,6 @@ int actually_copy(void *dest, void *source){
 
 int tps_write(size_t offset, size_t length, char *buffer)
 {
-  printf("entered write\n");
   //get tps for current thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps) == -1){
@@ -200,6 +199,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
   }
 
   enter_critical_section();
+    printf("entered write\n");
   //Write to mem
   mprotect(tps->page->address, length, PROT_WRITE);
   memcpy(tps->page->address + offset, buffer, length);
