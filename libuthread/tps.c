@@ -240,12 +240,15 @@ int tps_clone(pthread_t tid)
     //return -1 if already tps for this tid
     return -1;
   }
+  printf("no current tps\n");
+
   //get tps for target thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, (void*)tid, (void**)&tps) == -1){
     //return -1 if no tps for this tid
     return -1;
   }
+  printf("tps for tid exists\n");
 
   tps_create_with_pointer(tps);
 
