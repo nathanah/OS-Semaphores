@@ -149,7 +149,6 @@ int tps_read(size_t offset, size_t length, char *buffer)
   }
 
   enter_critical_section();
-    printf("entered read\n");
   //Read from mem
   mprotect(tps->page->address, length, PROT_READ);
   memcpy(buffer, tps->page->address + offset, length);
@@ -203,7 +202,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
   }
 
   enter_critical_section();
-    printf("entered write\n");
+
   //Write to mem
   mprotect(tps->page->address, length, PROT_WRITE);
   memcpy(tps->page->address + offset, buffer, length);
@@ -215,37 +214,30 @@ int tps_write(size_t offset, size_t length, char *buffer)
 
 int tps_create_with_pointer(tps_t tps)
 {
-  printf("entered Create w pointer\n");
   tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
 
   if (currTPS == NULL) {
-    printf("malloc error\n");
-    return -1;
-  }
-  printf("after if\n");
-  currTPS->tid = pthread_self();
-  printf("almost malloc2\n");
-  currTPS->page = (page_t)malloc(sizeof(struct page));
-  printf("past malloc2\n");
-  if (currTPS->page == NULL){
-    printf("malloc2 error\n");
     return -1;
   }
 
-  printf("copy stuff");
+  currTPS->tid = pthread_self();
+  currTPS->page = (page_t)malloc(sizeof(struct page));
+  if (currTPS->page == NULL){
+    return -1;
+  }
+
   currTPS->page->address = tps->page->address;
   queue_enqueue(tpsHolders, currTPS);
   currTPS->copyFrom = tps;
   queue_enqueue(tps->copyingMe, currTPS);
 
-  printf("exit cwp\n");
   return 0;
 }
 
 int tps_clone(pthread_t tid)
 {
-  enter_critical_section();
-  printf("entered clone\n");
+  //enter_critical_section();
+
   //check for tps for current thread
   tps_t current_tps = NULL;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps);
@@ -253,7 +245,6 @@ int tps_clone(pthread_t tid)
     //return -1 if already tps for this tid
     return -1;
   }
-  printf("no current tps\n");
 
   //get tps for target thread
   tps_t tps;
@@ -262,10 +253,9 @@ int tps_clone(pthread_t tid)
     //return -1 if no tps for this tid
     return -1;
   }
-  printf("tps for tid exists\n");
 
   tps_create_with_pointer(tps);
 
-  exit_critical_section();
+  //exit_critical_section();
   return 0;
 }
