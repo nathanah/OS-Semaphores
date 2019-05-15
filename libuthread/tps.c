@@ -157,6 +157,11 @@ int tps_read(size_t offset, size_t length, char *buffer)
     return -1;
   }
 
+  // Error if out of bounds
+  if(offset > length){
+    return -1;
+  }
+
   enter_critical_section();
   // Read from mem
   mprotect(tps->page->address, length, PROT_READ);
@@ -199,6 +204,11 @@ int tps_write(size_t offset, size_t length, char *buffer)
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps);
   if(tps == NULL){
     // Return -1 if no tps for this tid
+    return -1;
+  }
+
+  // Error if out of bounds
+  if(offset > length){
     return -1;
   }
 
