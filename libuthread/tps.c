@@ -42,7 +42,8 @@ tps_t tps_address_find(void* targetTPS) {
   }
   // Iterate through the queue and see if targetTPS exist in said queue
   // If it does not exist we return NULL
-  if (queue_iterate(tpsHolders, queue_address, (void*)targetTPS, (void**)&current) == -1) {
+  queue_iterate(tpsHolders, queue_address, (void*)targetTPS, (void**)&current);
+  if (current == NULL) {
     return NULL;
   }
   return current;
@@ -123,7 +124,8 @@ int tps_destroy(void)
 {
   //get tps for current thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps) == -1){
+  queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps);
+  if(tps == NULL){
     //return -1 if no tps for this tid
     return -1;
   }
@@ -140,7 +142,8 @@ int tps_read(size_t offset, size_t length, char *buffer)
 {
   //get tps for current thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void **)&tps) == -1){
+  queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void **)&tps);
+  if(tps == NULL){
     //return -1 if no tps for this tid
     return -1;
   }
@@ -185,7 +188,8 @@ int tps_write(size_t offset, size_t length, char *buffer)
 {
   //get tps for current thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps) == -1){
+  queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps);
+  if(tps == NULL){
     //return -1 if no tps for this tid
     return -1;
   }
@@ -237,7 +241,8 @@ int tps_clone(pthread_t tid)
   printf("entered clone\n");
   //check for tps for current thread
   tps_t current_tps;
-  if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps) == 0){
+  queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps);
+  if(current_tps != NULL){
     printf("tps already exists\n");
     //return -1 if already tps for this tid
     return -1;
@@ -246,7 +251,8 @@ int tps_clone(pthread_t tid)
 
   //get tps for target thread
   tps_t tps;
-  if(queue_iterate(tpsHolders, tps_find, (void*)tid, (void**)&tps) == -1){
+  queue_iterate(tpsHolders, tps_find, (void*)tid, (void**)&tps);
+  if(tps == NULL){
     //return -1 if no tps for this tid
     return -1;
   }
