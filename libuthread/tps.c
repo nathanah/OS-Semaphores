@@ -233,6 +233,7 @@ int tps_create_with_pointer(tps_t tps)
 
 int tps_clone(pthread_t tid)
 {
+  enter_critical_section();
   printf("entered clone\n");
   //check for tps for current thread
   tps_t current_tps;
@@ -252,5 +253,6 @@ int tps_clone(pthread_t tid)
 
   tps_create_with_pointer(tps);
 
+  exit_critical_section();
   return 0;
 }
