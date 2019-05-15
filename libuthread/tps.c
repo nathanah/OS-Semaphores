@@ -240,9 +240,11 @@ int tps_clone(pthread_t tid)
   enter_critical_section();
   printf("entered clone\n");
   //check for tps for current thread
-  tps_t current_tps;
+  tps_t current_tps == NULL;
+  printf("current_tps: %p", current_tps);
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps);
   if(current_tps != NULL){
+    printf("current_tps: %p", current_tps);
     printf("tps already exists\n");
     //return -1 if already tps for this tid
     return -1;
