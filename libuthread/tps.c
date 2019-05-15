@@ -138,6 +138,7 @@ int tps_destroy(void)
 
 int tps_read(size_t offset, size_t length, char *buffer)
 {
+  printf("entered read\n");
   //get tps for current thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void **)&tps) == -1){
@@ -182,6 +183,7 @@ int actually_copy(void *dest, void *source){
 
 int tps_write(size_t offset, size_t length, char *buffer)
 {
+  printf("entered write\n");
   //get tps for current thread
   tps_t tps;
   if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps) == -1){
@@ -209,6 +211,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
 
 int tps_create_with_pointer(tps_t tps)
 {
+  printf("entered Create w pointer\n");
   tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
 
   if (!currTPS) {
@@ -230,6 +233,7 @@ int tps_create_with_pointer(tps_t tps)
 
 int tps_clone(pthread_t tid)
 {
+  printf("entered clone\n");
   //check for tps for current thread
   tps_t current_tps;
   if(queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps) == 0){
