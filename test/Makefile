@@ -4,7 +4,8 @@ programs := \
 	sem_buffer.x \
 	sem_prime.x \
 	tps.x \
-	tpsPt2.x
+	tpsPt2.x \
+	tpsPt3.x
 
 # User-level thread library
 UTHREADLIB := libuthread
