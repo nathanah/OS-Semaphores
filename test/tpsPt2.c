@@ -9,8 +9,9 @@
 
 void *thread1 (void *arg) {
   char str[1000] = {0};
+  fprintf(stdout, "start tests\n");
 
-  //no init space
+  //no tps
   assert(tps_write(0, 1000, str) == -1);
   assert(tps_read(0, 1000, str) == -1);
   fprintf(stdout, "no init tests: passed\n");

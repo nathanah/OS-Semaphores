@@ -37,7 +37,7 @@ int queue_address(void* targetTPS, void* address) {
 
 tps_t tps_address_find(void* targetTPS) {
   tps_t current = NULL;
-  if (tpsHolders == NULL || !targetTPS) {
+  if (tpsHolders == NULL || targetTPS == NULL) {
     return NULL;
   }
   // Iterate through the queue and see if targetTPS exist in said queue
@@ -132,7 +132,7 @@ int tps_create(void)
 int tps_destroy(void)
 {
   // Get tps for current thread
-  tps_t tps;
+  tps_t tps = NULL;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps);
   if(tps == NULL){
     // Return -1 if no tps for this tid
@@ -150,7 +150,7 @@ int tps_destroy(void)
 int tps_read(size_t offset, size_t length, char *buffer)
 {
   // Get tps for current thread
-  tps_t tps;
+  tps_t tps = NULL;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void **)&tps);
   if(tps == NULL){
     // Return -1 if no tps for this tid
@@ -200,7 +200,7 @@ int actually_copy(void *dest, void *source){
 int tps_write(size_t offset, size_t length, char *buffer)
 {
   // Get tps for current thread
-  tps_t tps;
+  tps_t tps = NULL;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps);
   if(tps == NULL){
     // Return -1 if no tps for this tid
@@ -270,7 +270,7 @@ int tps_clone(pthread_t tid)
   }
 
   // Get tps for target thread
-  tps_t tps;
+  tps_t tps = NULL;
   queue_iterate(tpsHolders, tps_find, (void*)tid, (void**)&tps);
   if(tps == NULL){
     // Return -1 if no tps for this tid
