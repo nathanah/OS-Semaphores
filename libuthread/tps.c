@@ -236,7 +236,7 @@ int tps_create_with_pointer(tps_t tps)
 
 int tps_clone(pthread_t tid)
 {
-  //enter_critical_section();
+  enter_critical_section();
 
   //check for tps for current thread
   tps_t current_tps = NULL;
@@ -256,6 +256,6 @@ int tps_clone(pthread_t tid)
 
   tps_create_with_pointer(tps);
 
-  //exit_critical_section();
+  exit_critical_section();
   return 0;
 }
