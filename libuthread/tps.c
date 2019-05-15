@@ -225,7 +225,7 @@ int tps_create_with_pointer(tps_t tps)
   printf("after if\n");
   currTPS->tid = pthread_self();
   printf("almost malloc2\n");
-  page_t page = malloc(sizeof(struct page));
+  page_t page = (page_t)malloc(sizeof(struct page));
   if (page == NULL){
     printf("malloc2 error\n");
     return -1;
