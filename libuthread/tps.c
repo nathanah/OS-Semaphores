@@ -57,20 +57,19 @@ static void segv_handler(int sig, siginfo_t *si, void *context)
      */
     void *p_fault = (void*)((uintptr_t)si->si_addr & ~(TPS_SIZE - 1));
 
-    /*
-     * Iterate through all the TPS areas and find if p_fault matches one of them
-     */
+
+    // Iterate through all the TPS areas and find if p_fault matches one of them
     tps_t targetTPS = tps_address_find(p_fault);
 
     // If we do find a match we print the error
     if (targetTPS != NULL)
-        /* Printf the following error message */
+        // Printf the following error message
         fprintf(stderr, "TPS protection error!\n");
 
-    /* In any case, restore the default signal handlers */
+    // In any case, restore the default signal handlers
     signal(SIGSEGV, SIG_DFL);
     signal(SIGBUS, SIG_DFL);
-    /* And transmit the signal again in order to cause the program to crash */
+    // And transmit the signal again in order to cause the program to crash
     raise(sig);
 }
 
@@ -78,7 +77,7 @@ int tps_init(int segv)
 {
   tpsHolders = queue_create();
 
-  //...
+
   if (segv) {
     struct sigaction sa;
 
@@ -88,7 +87,7 @@ int tps_init(int segv)
     sigaction(SIGBUS, &sa, NULL);
     sigaction(SIGSEGV, &sa, NULL);
   }
-  //...
+
 
 
   return 0;
@@ -97,11 +96,11 @@ int tps_init(int segv)
 int tps_create(void)
 {
 
-  //check for tps for current thread
+  // Check for tps for current thread
   tps_t current_tps = NULL;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps);
   if(current_tps != NULL){
-    //return -1 if already tps for this tid
+    // Return -1 if already tps for this tid
     return -1;
   }
 
@@ -114,8 +113,9 @@ int tps_create(void)
   currTPS->tid = pthread_self();
   page_t page = malloc(sizeof(struct page));
 
-  if (!page)
-    return 1;
+  if (page == NULL){
+    return -1;
+  }
 
   page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);
   currTPS->page = page;
@@ -124,22 +124,22 @@ int tps_create(void)
   return 0;
 }
 
-//queue_iterate function to return tps with given tid
+// queue_iterate function to return tps with given tid
 int tps_find(void* tps, void* tid){
   return (((tps_t)tps)->tid == (pthread_t)tid) ? 1 : 0;
 }
 
 int tps_destroy(void)
 {
-  //get tps for current thread
+  // Get tps for current thread
   tps_t tps;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps);
   if(tps == NULL){
-    //return -1 if no tps for this tid
+    // Return -1 if no tps for this tid
     return -1;
   }
 
-  //delete tps stuff
+  // Delete tps stuff
   munmap(tps->page->address, TPS_SIZE);
   free(tps->page);
   free(tps);
@@ -149,16 +149,16 @@ int tps_destroy(void)
 
 int tps_read(size_t offset, size_t length, char *buffer)
 {
-  //get tps for current thread
+  // Get tps for current thread
   tps_t tps;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void **)&tps);
   if(tps == NULL){
-    //return -1 if no tps for this tid
+    // Return -1 if no tps for this tid
     return -1;
   }
 
   enter_critical_section();
-  //Read from mem
+  // Read from mem
   mprotect(tps->page->address, length, PROT_READ);
   memcpy(buffer, tps->page->address + offset, length);
   mprotect(tps->page->address, length, PROT_NONE);
@@ -171,11 +171,11 @@ int actually_copy(void *dest, void *source){
   tps_t tps_dest = (tps_t)dest;
   tps_t tps_source = (tps_t)source;
 
-  //Create new page
+  // Create new page
   tps_dest->page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);
 
   enter_critical_section();
-  //Copy tps
+  // Copy tps
   mprotect(tps_dest->page->address, TPS_SIZE, PROT_WRITE);
   mprotect(tps_source->page->address, TPS_SIZE, PROT_READ);
   memcpy(tps_dest->page->address, tps_source->page->address, TPS_SIZE);
@@ -183,10 +183,10 @@ int actually_copy(void *dest, void *source){
   mprotect(tps_source->page->address, TPS_SIZE, PROT_NONE);
   exit_critical_section();
 
-  //delete tps_dest from tps_source->copyingMe
+  // Delete tps_dest from tps_source->copyingMe
   queue_delete(tps_source->copyingMe, tps_dest);
 
-  //set tps_dest->copyFrom to null
+  // Set tps_dest->copyFrom to null
   tps_dest->copyFrom = NULL;
 
   return 0;
@@ -194,17 +194,20 @@ int actually_copy(void *dest, void *source){
 
 int tps_write(size_t offset, size_t length, char *buffer)
 {
-  //get tps for current thread
+  // Get tps for current thread
   tps_t tps;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&tps);
   if(tps == NULL){
-    //return -1 if no tps for this tid
+    // Return -1 if no tps for this tid
     return -1;
   }
 
+  // Copy-on-write activation for this TPS
   if(tps->copyFrom){
     actually_copy(tps,tps->copyFrom);
   }
+
+  // Copy-on-write activation for TPSs pointing at this TPS
   int *dummy;
   if(queue_length(tps->copyingMe)>0){
     queue_iterate(tps->copyingMe, actually_copy, (void*)tps, (void**)&dummy);
@@ -212,7 +215,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
 
   enter_critical_section();
 
-  //Write to mem
+  // Write to mem
   mprotect(tps->page->address, length, PROT_WRITE);
   memcpy(tps->page->address + offset, buffer, length);
   mprotect(tps->page->address, length, PROT_NONE);
@@ -221,6 +224,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
   return 0;
 }
 
+// Creates a TPS without a page to save memory in Copy-on-Write
 int tps_create_with_pointer(tps_t tps)
 {
   tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
@@ -247,19 +251,19 @@ int tps_clone(pthread_t tid)
 {
   enter_critical_section();
 
-  //check for tps for current thread
+  // Check for tps for current thread
   tps_t current_tps = NULL;
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps);
   if(current_tps != NULL){
-    //return -1 if already tps for this tid
+    // Return -1 if already tps for this tid
     return -1;
   }
 
-  //get tps for target thread
+  // Get tps for target thread
   tps_t tps;
   queue_iterate(tpsHolders, tps_find, (void*)tid, (void**)&tps);
   if(tps == NULL){
-    //return -1 if no tps for this tid
+    // Return -1 if no tps for this tid
     return -1;
   }
 
