@@ -23,6 +23,13 @@ functions defined in tps.h to simplify our code. tps_find() allows for us to
 use queue_iterate() to find the TPS that corresponds to a given tid.
 actually_copy() is used for the copy-on-write cloning.
 
+## Protected TPS
+To recognize when a segfault was on a TPS, we used the provided signal handler
+skeleton and added tps_address_find() and queue_address(). We would use
+queue_iterate() to test if each TPS in the global queue had an page with an
+address that matched where the segfault was. If there was a match, then we
+would print the "TPS Protection error" message before exiting. 
+
 
 ## Copy-on-Write Cloning
 To allow for copy-on-write cloning, instead of actually copying the page in
@@ -41,4 +48,4 @@ We separated the testing of our TPS into three files:
  2. tpsPt2.c
  3. tpsPt3.c
 tps.c tests functionality given correct inputs while tpsPt2 and tpsPt3 test
-edge cases for incorrect input or ordering. 
+edge cases for incorrect input or ordering.

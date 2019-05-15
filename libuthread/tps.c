@@ -110,15 +110,15 @@ int tps_create(void)
   }
 
   tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
-
   if (currTPS == NULL) {
+    // Return -1 if malloc failed
     return -1;
   }
 
   currTPS->tid = pthread_self();
   page_t page = malloc(sizeof(struct page));
-
   if (page == NULL){
+    // Return -1 if malloc failed
     return -1;
   }
 
@@ -217,7 +217,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
     actually_copy(tps,tps->copyFrom);
   }
 
-  // Copy-on-write activation for TPSs pointing at this TPS
+  // Copy-on-write activation for any TPS pointing at this TPS
   int *dummy;
   if(queue_length(tps->copyingMe)>0){
     queue_iterate(tps->copyingMe, actually_copy, (void*)tps, (void**)&dummy);
