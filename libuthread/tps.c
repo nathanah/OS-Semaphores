@@ -227,10 +227,10 @@ int tps_create_with_pointer(tps_t tps)
   printf("almost malloc2\n");
   currTPS->page = (page_t)malloc(sizeof(struct page));
   printf("past malloc2\n");
-  // if (page == NULL){
-  //   printf("malloc2 error\n");
-  //   return -1;
-  // }
+  if (currTPS->page == NULL){
+    printf("malloc2 error\n");
+    return -1;
+  }
 
   printf("copy stuff");
   currTPS->page->address = tps->page->address;
