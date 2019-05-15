@@ -63,7 +63,7 @@ $(libuthread):
 	@echo "MAKE	$@"
 	$(Q)$(MAKE) V=$(V) D=$(D) -C $(UTHREADPATH)
 
-tpsPt3.x: LDFLAGS += -Wl, --wrap=mmap
+tpsPt3.x: LDFLAGS += -Wl,--wrap=mmap
 
 # Generic rule for linking final applications
 %.x: %.o $(libuthread)
