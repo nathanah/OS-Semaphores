@@ -47,6 +47,7 @@ We separated the testing of our TPS into three files:
  1. tps.c (as given)
  2. tpsPt2.c
  3. tpsPt3.c
+ 
 tps.c tests functionality given correct inputs while tpsPt2 and tpsPt3 test
 edge cases for incorrect input or ordering.
 Specifically tpsPt2 checks to see any edge cases for our tps functions.
