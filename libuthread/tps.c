@@ -158,7 +158,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
   }
 
   // Error if out of bounds
-  if(offset > length){
+  if(offset + length > TPS_SIZE || offset < 0){
     return -1;
   }
 
@@ -208,7 +208,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
   }
 
   // Error if out of bounds
-  if(offset > length){
+  if(offset + length > TPS_SIZE || offset < 0){
     return -1;
   }
 
