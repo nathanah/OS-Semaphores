@@ -3,7 +3,11 @@
 Each semaphore consists of just a count variable and a queue pointer.
 
 ##functions
-
+We needed to put sem_up() and sem_down() fully into critical sections, so that
+a blocked thread would immediately be resumed as soon as a sem_up is called.
+This also ensures mutual exclusion such that multiple threads will be released
+in the correct order. No if() blocks can be entered by concurrently running
+threads at the same time based on information that one thread would change.
 
 #TPS
 ##structure

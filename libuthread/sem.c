@@ -7,14 +7,12 @@
 #include "thread.h"
 
 struct semaphore {
-	/* TODO Phase 1 */
   size_t count;
   queue_t blocked;
 };
 
 sem_t sem_create(size_t count)
 {
-	/* TODO Phase 1 */
   sem_t new_sem;
   new_sem = (sem_t)malloc(sizeof(struct semaphore));
   new_sem->blocked = queue_create();
@@ -25,7 +23,6 @@ sem_t sem_create(size_t count)
 
 int sem_destroy(sem_t sem)
 {
-	/* TODO Phase 1 */
   if(sem == NULL || queue_length(sem->blocked) > 0){
     return -1;
   }
@@ -37,7 +34,6 @@ int sem_destroy(sem_t sem)
 
 int sem_down(sem_t sem)
 {
-	/* TODO Phase 1 */
   enter_critical_section();
   if(sem == NULL)
     return -1;
@@ -46,7 +42,7 @@ int sem_down(sem_t sem)
     queue_enqueue(sem->blocked, (void*)pthread_self());
     thread_block();
   }
-	
+
   sem->count -= 1;
   exit_critical_section();
   return 0;
@@ -54,7 +50,6 @@ int sem_down(sem_t sem)
 
 int sem_up(sem_t sem)
 {
-  /* TODO Phase 1 */
   enter_critical_section();
   if(sem == NULL)
     return -1;
@@ -72,12 +67,11 @@ int sem_up(sem_t sem)
 
 int sem_getvalue(sem_t sem, int *sval)
 {
-	/* TODO Phase 1 */
   if(sem == NULL || sval == NULL)
     return -1;
 
   if (sem->count > 0) {
-	  *sval = sem->count; 
+	  *sval = sem->count;
   }
   else {
 	  *sval = -1*queue_length(sem->blocked);
