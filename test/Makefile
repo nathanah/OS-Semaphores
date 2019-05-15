@@ -43,7 +43,7 @@ CFLAGS	+= -g
 endif
 
 # Linker options
-LDFLAGS := -L$(UTHREADPATH) -luthread
+LDFLAGS := -L$(UTHREADPATH) -luthread, --wrap=mmap, -Wl
 
 # Include path
 INCLUDE := -I$(UTHREADPATH)
