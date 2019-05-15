@@ -225,8 +225,10 @@ int tps_create_with_pointer(tps_t tps)
 
   currTPS->tid = pthread_self();
   page_t page = malloc(sizeof(struct page));
-  if (!page)
-    return 1;
+  if (page == NULL){
+    printf("malloc2 error\n");
+    return -1;
+  }
 
   printf("copy stuff");
   currTPS->page->address = tps->page->address;
