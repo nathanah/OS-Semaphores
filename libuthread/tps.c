@@ -145,10 +145,12 @@ int tps_read(size_t offset, size_t length, char *buffer)
     return -1;
   }
 
+  enter_critical_section();
   //Read from mem
   mprotect(tps->page->address, length, PROT_READ);
   memcpy(buffer, tps->page->address + offset, length);
   mprotect(tps->page->address, length, PROT_NONE);
+  exit_critical_section();
 
   return 0;
 }
@@ -160,12 +162,14 @@ int actually_copy(void *dest, void *source){
   //Create new page
   tps_dest->page->address = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, FD, OFFSET);
 
+  enter_critical_section();
   //Copy tps
   mprotect(tps_dest->page->address, TPS_SIZE, PROT_WRITE);
   mprotect(tps_source->page->address, TPS_SIZE, PROT_READ);
   memcpy(tps_dest->page->address, tps_source->page->address, TPS_SIZE);
   mprotect(tps_dest->page->address, TPS_SIZE, PROT_NONE);
   mprotect(tps_source->page->address, TPS_SIZE, PROT_NONE);
+  exit_critical_section();
 
   //delete tps_dest from tps_source->copyingMe
   queue_delete(tps_source->copyingMe, tps_dest);
@@ -193,10 +197,12 @@ int tps_write(size_t offset, size_t length, char *buffer)
     queue_iterate(tps->copyingMe, actually_copy, (void*)tps, (void**)&dummy);
   }
 
+  enter_critical_section();
   //Write to mem
   mprotect(tps->page->address, length, PROT_WRITE);
   memcpy(tps->page->address + offset, buffer, length);
   mprotect(tps->page->address, length, PROT_NONE);
+  exit_critical_section();
 
   return 0;
 }
