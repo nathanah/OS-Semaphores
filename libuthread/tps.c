@@ -96,9 +96,18 @@ int tps_init(int segv)
 
 int tps_create(void)
 {
+
+  //check for tps for current thread
+  tps_t current_tps = NULL;
+  queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps);
+  if(current_tps != NULL){
+    //return -1 if already tps for this tid
+    return -1;
+  }
+
   tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
 
-  if (!currTPS) {
+  if (currTPS == NULL) {
     return -1;
   }
 
