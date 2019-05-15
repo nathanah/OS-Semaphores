@@ -218,7 +218,8 @@ int tps_create_with_pointer(tps_t tps)
   printf("entered Create w pointer\n");
   tps_t currTPS = (tps_t)malloc(sizeof(struct TPS));
 
-  if (!currTPS) {
+  if (currTPS == NULL) {
+    printf("malloc error\n");
     return -1;
   }
 
@@ -227,11 +228,13 @@ int tps_create_with_pointer(tps_t tps)
   if (!page)
     return 1;
 
+  printf("copy stuff");
   currTPS->page->address = tps->page->address;
   queue_enqueue(tpsHolders, currTPS);
   currTPS->copyFrom = tps;
   queue_enqueue(tps->copyingMe, currTPS);
 
+  printf("exit cwp\n");
   return 0;
 }
 
@@ -241,11 +244,8 @@ int tps_clone(pthread_t tid)
   printf("entered clone\n");
   //check for tps for current thread
   tps_t current_tps = NULL;
-  printf("current_tps: %p", current_tps);
   queue_iterate(tpsHolders, tps_find, (void*)pthread_self(), (void**)&current_tps);
   if(current_tps != NULL){
-    printf("current_tps: %p", current_tps);
-    printf("tps already exists\n");
     //return -1 if already tps for this tid
     return -1;
   }
